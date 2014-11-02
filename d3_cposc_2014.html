@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>D3.js Data Visualization</title>
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/beige.css" id="theme">
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+		<script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+		</script>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script src="lib/js/d3.js"></script>
+		<script src="lib/js/jquery.js"></script>
+		<script src="lib/js/lodash.js"></script>
+		<style>
+			.chart rect {
+				fill: steelblue;
+			}
+			.chart text {
+				fill: white;
+				font: 10px sans-serif;
+				text-anchor: end;
+			}
+
+			.axis text {
+			  font: 10px sans-serif;
+			}
+
+			.axis path,
+			.axis line {
+			  fill: none;
+			  stroke: #000;
+			  shape-rendering: crispEdges;
+			}
+		</style>					
+	</head>
+
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+
+<section data-state='cover'>
+	<h2>D3.js Data Visualization</h2>
+	<h3>Central PA Open Source Conference</h3>
+	<p><small>November 1, 2014</small></p>
+</section>
+
+<section data-state='whatisit' data-background="lib/examples.png">
+	<h2>&nbsp;&nbsp;&nbsp;What is D3.js?</h2>
+</section>
+
+<section>
+	<h2>News Stories/Analysis</h2>
+	<p><a href='http://www.washingtonpost.com/wp-srv/special/sports/leagues-of-the-world-cup/' target='_blank'>Washington Post: Leagues of the World Cup</a></p>
+	<p><a href='http://www.nytimes.com/interactive/2014/upshot/mapping-the-spread-of-drought-across-the-us.html' target='_blank'>NY Times: Mapping the Spread of Drought Across the U.S.</a></p>	
+	<p><a href='http://www.nytimes.com/newsgraphics/2014/senate-model/' target='_blank'>NY Times: Who Will Win The Senate?</a></p>	
+	<p><a href='http://www.nytimes.com/2014/05/02/upshot/how-not-to-be-misled-by-the-jobs-report.html' target='_blank'>NY Times: How Not to Be Misled by the Jobs Report</a></p>	
+</section>
+
+<section>
+	<h2>A Super-simple SVG Chart</h2>
+	<svg class="chart" width="200" height="150">
+		<rect x="10" y="50" width="30" height="80"></rect>
+		<rect x="50" y="30" width="30" height="100"></rect>
+		<rect x="90" y="80" width="30" height="50"></rect>
+		<text>asfsadf</text>
+	</svg>
+	<pre><code data-trim contenteditable>
+<svg class="chart" width="200" height="200">
+  <rect x="10" y="50" width="30" height="80"></rect>
+  <rect x="50" y="30" width="30" height="100"></rect>
+  <rect x="90" y="80" width="30" height="50"></rect>						
+</svg>
+
+<style>
+.chart rect {
+  fill: steelblue;
+}
+</style>
+</code></pre>									
+</section>
+
+<section data-state="templateapproach" id="templateapproach">
+	<h2>The Template Approach</h2>
+	<pre><code data-trim>
+var templateData = { listItems: [25, 75, 40]};
+</code></pre>
+	<pre><code data-trim>
+
+<svg class="chart" width="200" height="200">
+<% _.each( rc.listItems, function( item, index ){ %>
+  <rect x="{{index*40}}" y="{{200-item}}" width="30" height="{{item}}"></rect>
+<% }); %>
+</svg>				
+	</code></pre>									
+	<div id="templatecontainer"></div>
+
+<!--script type="text/template" class="template1">
+<svg class="chart" width="200" height="200">
+<% _.each( rc.listItems, function( item, index ){ %>
+	<rect x="{{index*40}}" y="{{200-item}}" width="30" height="{{item}}"></rect>
+<% }); %>
+</svg>
+</script-->
+
+<script type='text/javascript'>
+// Reveal.addEventListener( 'templateapproach', function() {
+// 	_.templateSettings.variable = "rc";
+// 	_.templateSettings.interpolate = /\{\{([\s\S]+?)\}\}/g;
+// 	var template = _.template( $( "script.template1" ).html());
+// 	var templateData = { listItems: [25, 75, 40]};
+// 	var tt = template( templateData );
+// 	console.log(tt);
+// 	$( "#templatecontainer" ).html(tt);
+// });
+</script>
+
+</section>
+
+<section>
+	<h2>The D3 approach</h2>
+	<pre><code data-trim>
+var height = 150, width = 200;
+d3.select('body').append('svg')
+  .attr('width', width)
+  .attr('height', height);
+
+var data = [25, 75, 40];
+
+var bars = svg.selectAll('rect').data(data); 
+
+bars.enter().append('rect') // new nodes
+  .attr('x', function(d,i) { return i * 40; })
+  .attr('y', function(d,i) { return height - d.value; })
+  .attr('width', 30)
+  .attr('height', function(d,i) { return d.value; });
+	</code></pre>
+	<h3>Why not markup/templating?</h3>
+</section>
+
+<section data-state="transitions" id="transitions">
+	<h2>Transitions</h2>
+	<div id='transitionscontainer'></div>
+	<select id='stateSelect'>
+		<option>PA</option>
+		<option>NJ</option>
+		<option>NY</option>		
+	</select>
+	<input id='duration' type='text' value='0'>
+<script type="text/javascript">
+Reveal.addEventListener( 'transitions', function() {
+
+	var height = 150, width = 200;
+	var svg = d3.select("#transitionscontainer").selectAll('svg').data([0]).enter().append("svg")
+	svg.attr( {width: width, height: height, class: 'chart' });
+	var stateData = [
+		{ state: 'PA', category: 'A', value: 25 },
+		{ state: 'PA', category: 'B', value: 75 },
+		{ state: 'PA', category: 'C', value: 40 },
+
+		{ state: 'NJ', category: 'A', value: 25 },
+		{ state: 'NJ', category: 'B', value: 140 },
+		{ state: 'NJ', category: 'C', value: 100 },
+
+		{ state: 'NY', category: 'B', value: 20 },
+		{ state: 'NY', category: 'C', value: 75 },
+	]
+
+	update();
+
+	function update() {
+		var duration = +d3.select('#transitions #duration').property('value');
+		var selectedState = d3.select('#transitions #stateSelect').property('value');
+
+		var data = _(stateData).filter({ state: selectedState }).value();
+
+		var bars = svg.selectAll('rect').data(data); 
+
+		bars.transition().duration(duration)
+			.attr('x', function(d,i) { return i * 40; })
+			.attr('y', function(d,i) { return height - d.value; })
+			.attr('height', function(d,i) { return d.value; })
+
+		bars.enter().append('rect')
+			.attr('x', function(d,i) { return i * 40; })
+			.attr('y', function(d,i) { return height - d.value; })
+			.attr('width', 30)
+			.attr('height', function(d,i) { return d.value; })
+
+		bars.exit().transition().duration(200)
+			.attr('y', height)
+			.attr('height', 0)
+	}
+
+	d3.select('#transitions #stateSelect').on('change', update);
+
+// var height = 150, width = 200;
+// d3.select('body').append('svg').attr('width', width).attr('height', height);
+
+} );
+
+</script>					
+
+</section>
+
+<section>
+	<h2>Data Setup</h2>
+	<pre><code data-trim>
+var stateData = [
+  { state: 'PA', category: 'A', value: 25 },
+  { state: 'PA', category: 'B', value: 75 },
+  { state: 'PA', category: 'C', value: 40 },
+
+  { state: 'NJ', category: 'A', value: 25 },
+  { state: 'NJ', category: 'B', value: 140 },
+  { state: 'NJ', category: 'C', value: 100 },
+
+  { state: 'NY', category: 'B', value: 20 },
+  { state: 'NY', category: 'C', value: 75 },
+];
+
+// underscore/lodash
+var data = _(stateData).filter({ state: selectedState }).value();
+	</code></pre>	
+</section>
+
+<section>
+	<h2>Data Join & Callbacks</h2>
+	<pre><code data-trim>
+var bars = svg.selectAll('rect').data(data); 
+
+bars.transition().duration(duration) // existing nodes
+  .attr('x', function(d,i) { return i * 40; })
+  .attr('y', function(d,i) { return height - d.value; })
+  .attr('height', function(d,i) { return d.value; });
+
+bars.enter().append('rect') // new nodes
+  .attr('x', function(d,i) { return i * 40; })
+  .attr('y', function(d,i) { return height - d.value; })
+  .attr('width', 30)
+  .attr('height', function(d,i) { return d.value; });
+
+bars.exit().transition().duration(200) // "not found" nodes
+  .attr('y', height)
+  .attr('height', 0);
+	</code></pre>
+</section>
+
+<section data-state="randomcircles" id="randomcircles">
+	<h2>Chained Transitions</h2>
+	<div id="randomcirclescontainer"></div>
+<script type="text/javascript">
+Reveal.addEventListener( 'randomcircles', function() {
+
+	var height = 250, width = 800;
+	var svg = d3.select("#randomcirclescontainer").selectAll('svg').data([0]).enter().append("svg")
+	svg.attr( {width: width, height: height });
+	var data = new Array(250);
+
+	function randomizeData() {
+	  for (var i = data.length - 1; i >= 0; i--) {
+	    data[i] = { id: Math.random(), x: Math.random()*width, y: Math.random()*height }
+	  };
+	}
+
+	update();
+
+	function update() {
+	  randomizeData();
+
+	  var circles = svg.selectAll('circle').data(data); 
+
+	  circles
+	  	.transition().duration(500)
+	  		.attr('r', 3)
+	  	.transition().duration(1500)
+	    	.attr('cx', function(d) { return d.x; })
+	    	.attr('cy', function(d) { return d.y; })
+	  	.transition().duration(500)
+	  		.attr('r', 8)
+
+	  circles.enter().append('circle')
+	    .attr('cx', function(d) { return d.x; })
+	    .attr('cy', function(d) { return d.y; })
+	    .attr( { r: 8, fill: 'green' });
+	}
+
+	svg.on('click', update);
+
+	//var updateEvent = setInterval(update, 2000);
+
+	// Reveal.addEventListener( 'slidechanged', function(event) {
+	// 	console.log(event.previousSlide.id);
+	// 	if (event.previousSlide.id !== 'randomcircles') return;
+	// 	clearInterval(updateEvent);
+	// });
+
+} );
+
+</script>					
+<pre><code data-trim contenteditable>
+// data is array of 250 items with random x, y values, re-randomized with each click on the svg
+var circles = svg.selectAll("circle").data(data); 
+circles
+  .transition().duration(500)
+    .attr('r', 3)
+  .transition().duration(1500)
+    .attr('cx', function(d) { return d.x; })
+    .attr('cy', function(d) { return d.y; })
+  .transition().duration(500)
+    .attr('r', 8)
+
+circles.enter().append('circle')
+  .attr('cx', function(d) { return d.x; })
+  .attr('cy', function(d) { return d.y; })
+  .attr( { r: 8, fill: 'green' });
+</code></pre>
+</section>
+
+<section>
+	<h2>Scales</h2>
+	<p>Examples so far have been "cheating"
+	<p>What if data doesn't directly correlate to pixel height? What if height/width changes?
+	<pre><code data-trim>
+var data = [2, 7, 4];
+
+// let D3 calculate how input data corresponds to output pixels
+var yScale = d3.scale.linear().domain([1,10]).range([0,height]);
+var xScale = d3.scale.ordinal().domain(['A', 'B', 'C']).rangeRoundBands([0, width]);
+
+var bars = svg.selectAll('rect').data(data); 
+bars.enter().append('rect')
+  .attr('x', function(d) { return xScale(d.category); })
+  .attr('y', function(d) { return height - yScale(d.value); })
+  .attr('width', xScale.rangeBand())
+  .attr('height', function(d) { return yScale(d.value); });
+	</code></pre>
+</section>
+
+<section data-state="axes" id="axes">
+	<h2>Axes</h2>
+	<img src='lib/barchart.png'>
+	<pre><code data-trim>
+var yAxis = d3.svg.axis()
+  .scale(yScale)
+  .orient('left');
+
+var xAxis = d3.svg.axis()
+  .scale(xScale)
+  .orient('bottom');
+
+svg.append('g').call(yAxis);
+
+svg.append("g")
+  .attr("transform", "translate(0," + height + ")")
+  .call(xAxis);
+</code></pre>
+</section>
+
+
+<section>
+	<h2>Scale Types</h2>
+	<ul>
+		<li>Linear</li>
+		<li>Ordinal</li>
+		<li>Date/Time</li>
+		<li>Square Root</li>
+		<li>Power</li>
+		<li>Logarithmic</li>
+		<li>Quantize/Quantile</li>
+		<li>Category10 (colors)</li>
+		<li>Category20 (colors)</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Layouts</h2>
+	<img src='lib/pie.png'>
+	<img src='lib/tree.png'>
+	<p>Your code still responsible for final shapes, but gives you the geometry/structure to render with</p>
+	<ul>
+		<li>Pie</li>
+		<li>Tree</li>
+		<li>Stack</li>
+		<li>Partition</li>
+		<li>Hierarchy</li>
+		<li>Chord</li>
+		<li>Bundle</li>
+		<li>...</li>
+	</ul>
+</section>
+
+
+    <style>
+    .nodelink {
+      fill: none;
+      stroke: #ccc;
+      stroke-width: 4.5px;
+    }
+    .templink {
+      fill: none;
+      stroke: red;
+      stroke-width: 3px;
+    }
+    </style>
+<section data-state="interactive" id="interactive">
+	<h2>Interactivity</h2>
+	<p>Tree Layout</p>
+	<p>Drag Start/Drag End events</p>
+	<div id="interactivecontainer"></div>
+<script type="text/javascript">
+Reveal.addEventListener( 'interactive', function() {
+
+	d3.select("#interactivecontainer").selectAll('svg').remove()
+	var svg = d3.select("#interactivecontainer").append("svg")
+
+  var treeData = {"name" : "A", "children" : [ {"name" : "A1" },  {"name" : "A2" }, {"name" : "A3" } ] };
+  var selectedNode = null;
+  var draggingNode = null;
+
+  // ------------- moving -------------------------------  
+  var overCircle = function(d) {
+    selectedNode = d;
+    updateTempConnector();
+  }
+  var outCircle = function(d) {
+    selectedNode = null;
+    updateTempConnector();
+  }
+
+  var circleDragger = d3.behavior.drag()
+    .on("dragstart", function(d){
+      draggingNode = d;
+      // it's important that we suppress the mouseover event on the node being dragged. Otherwise it will absorb the mouseover event and the underlying node will not detect it
+      d3.select(this).attr( 'pointer-events', 'none' );
+    })
+    .on("drag", function(d) {
+      d.x += d3.event.dx;
+      d.y += d3.event.dy;
+      var node = d3.select(this);
+      node.attr( { cx: d.x, cy: d.y } );
+      updateTempConnector();
+    })
+    .on("dragend", function(d){
+      draggingNode = null;
+      // now restore the mouseover event or we won't be able to drag a 2nd time
+      d3.select(this).attr( 'pointer-events', '' );
+    })
+
+  var updateTempConnector = function() {
+    var data = [];
+    if ( draggingNode != null && selectedNode != null) {
+      // have to flip the source coordinates since we did this for the existing connectors on the original tree
+      data = [ {source: {x: selectedNode.y, y: selectedNode.x},
+                target: {x: draggingNode.x, y: draggingNode.y} } ];
+    }
+    var link = vis.selectAll(".templink").data(data);
+
+    link.enter().append("path")
+      .attr("class", "templink")
+      .attr("d", d3.svg.diagonal() )
+      .attr('pointer-events', 'none');
+
+    link.attr("d", d3.svg.diagonal() )
+
+    link.exit().remove();
+  }
+
+  // ------------- normal tree drawing code --------  
+  var vis = svg.attr("width", 400).attr("height", 300).append("svg:g").attr("transform", "translate(50, 0)")
+  var tree = d3.layout.tree().size([200,200]);
+  var nodes = tree.nodes(treeData);
+  var links = tree.links(nodes);
+
+  var diagonalHorizontal = d3.svg.diagonal().projection( function(d) { return [d.y, d.x]; } );
+  var link = vis.selectAll(".nodelink")
+    .data(links)
+    .enter().append("path")
+    .attr("class", "nodelink")
+    .attr("d", diagonalHorizontal)
+    .attr('pointer-events', 'none');
+
+  var node = vis.selectAll("g.node")
+    .data(nodes)
+    .enter().append("g")
+    .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+
+  node.append("circle")
+    .attr("r", 5)
+    .attr('pointer-events', 'none');
+
+  // ------------- trickery to avoid collision detection
+
+  // phantom node to give us mouseover in a radius around it
+  node.append("circle")
+    .attr("r", 60)
+    .attr("opacity", 0.0) // change this to non-zero to see the target area
+    .attr('pointer-events', 'mouseover')
+    .on("mouseover", overCircle)
+    .on("mouseout", outCircle)
+
+  // a new, unconnected node that can be dragged near others to connect it
+  newNodes = [ {x:300,y:5, name: 'new'} ];
+  vis.selectAll(".lonely")
+    .data(newNodes).enter().append("circle")
+      .attr("r", 5)
+      .attr("class", "lonely")
+      .attr("cx", function(d) { return d.x; })
+      .attr("cy", function(d) { return d.y; })
+      .call(circleDragger)
+
+} );
+
+</script>					
+
+</section>
+
+<section>
+<h2>Drag events</h2>
+<p>As before, your code still responsible for final shape updates</p>
+<pre><code data-trim>
+  var circleDragger = d3.behavior.drag()
+    .on("dragstart", function(d){
+      draggingNode = d;
+      d3.select(this).attr( 'pointer-events', 'none' );
+    })
+    .on("drag", function(d) {
+      d.x += d3.event.dx;
+      d.y += d3.event.dy;
+      var node = d3.select(this);
+      node.attr( { cx: d.x, cy: d.y } );
+      updateTempConnector();
+    })
+    .on("dragend", function(d){
+      draggingNode = null;
+      d3.select(this).attr( 'pointer-events', '' );
+    })
+</code></pre>
+</section>
+
+<section>
+	<h2>Related Libraries</h2>
+	<p>D3 is fairly low-level and forms the foundation for many higher-level libraries</p>
+	<ul>
+		<li>NVD3.js</li>
+		<li>C3.js</li>
+		<li>Dimple.js</li>
+		<li>DC.js (D3 + Crossfilter)</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Browser Support</h2>
+</section>
+
+<section>
+	<h2>Server-side (node.js)</h2>
+</section>
+
+<section>
+	<h2>When to use D3 directly?</h2>
+</section>
+
+<section>
+	<h2>The End</h2>
+</section>
+
+			</div>
+		</div>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+			    // width: 1024,
+			    // height: 768,
+			    // margin: 0.0,
+			    // minScale: 1.0,
+			    // maxScale: 1.0,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+// d3.select(self.frameElement).style("height", "768px");
+		</script>
+
+	</body>
+</html>
